@@ -1,0 +1,58 @@
+import { Bundle } from "@/types";
+
+export const bundles: Bundle[] = [
+  {
+    id: "merchandise-master-kit",
+    slug: "merchandise-master-kit",
+    name: "MERCHANDISE",
+    color: "#A3A3A3",
+    saveAmount: 65.00,
+    products: ["dithertone-pro", "vintone", "worn-plastisol-2", "grunge-frames"],
+    image: "/images/bundle-merchandise.jpg",
+  },
+  {
+    id: "the-glitch-kit",
+    slug: "the-glitch-kit",
+    name: "GLITCH",
+    color: "#A3A3A3",
+    saveAmount: 50.00,
+    products: ["mobglow", "crt-phaser", "typefx", "neuro-ui"],
+    image: "/images/bundle-glitch.jpg",
+  },
+  {
+    id: "silver-bundle",
+    slug: "silver-bundle",
+    name: "SILVER",
+    color: "#A3A3A3",
+    saveAmount: 296.00,
+    products: ["dithertone-pro", "worn-plastisol-2", "printer-noise", "mobglow", "typefx", "vintone", "chrometone", "analog-looks"],
+    image: "/images/bundle-silver.jpg",
+  },
+  {
+    id: "master-kit",
+    slug: "master-kit",
+    name: "MASTER KIT",
+    color: "#A3A3A3",
+    saveAmount: 120.00,
+    products: ["dithertone-pro", "vintone", "worn-plastisol-2", "mobglow", "typefx", "chrometone"],
+    image: "/images/bundle-master-kit.jpg",
+  },
+  {
+    id: "mixed-media-medley",
+    slug: "mixed-media-medley",
+    name: "MIXED MEDIA",
+    color: "#A3A3A3",
+    saveAmount: 15.00,
+    products: ["analog-looks", "collage-cutout", "mixed-media-1"],
+    image: "/images/bundle-mixed-media.jpg",
+  },
+  {
+    id: "texture-bundle",
+    slug: "texture-bundle",
+    name: "BUNDLE",
+    color: "#A3A3A3",
+    saveAmount: 85.00,
+    products: ["worn-plastisol-2", "printer-noise", "grunge-frames", "aged-photocopy"],
+    image: "/images/bundle-texture.jpg",
+  },
+];

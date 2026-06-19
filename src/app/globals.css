@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #FFFFFF;
+  --bg-secondary: #F5F5F5;
+  --bg-tertiary: #EEEEEE;
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --text-tertiary: #888888;
+  --border-color: rgba(0, 0, 0, 0.1);
+  --border-hover: rgba(0, 0, 0, 0.2);
+  --accent-purple: #7C6CFF;
+  --accent-purple-hover: #6B5BEE;
+  --accent-orange: #E8784A;
+  --accent-orange-bg: #FFF0EB;
+  --folder-tab: #CCCCCC;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: var(--accent-purple);
+  color: #FFFFFF;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--folder-tab);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+@layer components {
+  .folder-tab-card {
+    position: relative;
+    border: 1px solid var(--folder-tab);
+    border-radius: 8px;
+    background: var(--background);
+  }
+
+  .folder-tab-card::before {
+    content: "";
+    position: absolute;
+    top: -13px;
+    left: 20px;
+    width: 80px;
+    height: 12px;
+    border: 1px solid var(--folder-tab);
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    background: var(--background);
+  }
+
+  .dotted-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .dotted-title::before,
+  .dotted-title::after {
+    content: "···";
+    font-family: var(--font-jetbrains), monospace;
+    font-size: 1rem;
+    color: var(--folder-tab);
+    letter-spacing: 2px;
+  }
+}
