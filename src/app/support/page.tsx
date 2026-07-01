@@ -97,7 +97,7 @@ export default function SupportPage() {
       </section>
 
       {/* FAQ */}
-      <section className="border-t border-[rgba(0,0,0,0.08)] px-6 py-section">
+      <section className="border-t-2 border-t-[rgba(0,0,0,0.1)] px-6 py-section">
         <div className="max-w-content mx-auto">
           <div className="grid lg:grid-cols-2 gap-12">
             <ScrollReveal>

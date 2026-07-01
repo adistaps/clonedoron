@@ -115,7 +115,7 @@ export default function CrowdFavorites() {
 
         {/* Trusted By Section */}
         <ScrollReveal delay={0.2}>
-          <div className="border-t border-[rgba(0,0,0,0.1)] pt-10">
+          <div className="border-t-2 border-t-[rgba(0,0,0,0.1)] pt-10">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               {/* Brand 1 */}
               <div className="flex flex-col gap-2.5">
