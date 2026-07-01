@@ -8,7 +8,7 @@ import CornerDots from "@/components/CornerDots";
 
 export default function BuildBundle() {
   return (
-    <section className="relative bg-white py-20 px-6 border-b border-[rgba(0,0,0,0.1)]">
+    <section className="relative bg-white py-20 px-6 border-b-2 border-[rgba(0,0,0,0.1)]">
       <div className="max-w-content mx-auto relative">
         <CornerDots className="top-0 left-0" />
         <CornerDots className="top-0 right-0" />

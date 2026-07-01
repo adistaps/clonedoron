@@ -56,11 +56,14 @@ body {
 }
 
 @layer components {
+  /* Folder Tab Card - Product/Bundle cards */
   .folder-tab-card {
     position: relative;
-    border: 1px solid var(--folder-tab);
+    border: 1.5px solid var(--text-primary);
     border-radius: 8px;
     background: var(--background);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.25s ease;
   }
 
   .folder-tab-card::before {
@@ -70,12 +73,93 @@ body {
     left: 20px;
     width: 80px;
     height: 12px;
-    border: 1px solid var(--folder-tab);
+    border: 1.5px solid var(--text-primary);
     border-bottom: none;
     border-radius: 12px 12px 0 0;
     background: var(--background);
   }
 
+  /* Accent frame corners */
+  .accent-corner-tl {
+    position: relative;
+  }
+
+  .accent-corner-tl::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 24px;
+    height: 24px;
+    border-top: 2px solid var(--text-primary);
+    border-left: 2px solid var(--text-primary);
+    border-radius: 2px;
+  }
+
+  .accent-corner-tr::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    border-top: 2px solid var(--text-primary);
+    border-right: 2px solid var(--text-primary);
+    border-radius: 2px;
+  }
+
+  .accent-corner-bl::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 24px;
+    height: 24px;
+    border-bottom: 2px solid var(--text-primary);
+    border-left: 2px solid var(--text-primary);
+    border-radius: 2px;
+  }
+
+  .accent-corner-br::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    border-bottom: 2px solid var(--text-primary);
+    border-right: 2px solid var(--text-primary);
+    border-radius: 2px;
+  }
+
+  /* Border frame for sections */
+  .border-frame {
+    border: 1.5px solid var(--text-primary);
+    border-radius: 8px;
+  }
+
+  .border-frame-dashed {
+    border: 1.5px dashed var(--text-primary);
+    border-radius: 8px;
+  }
+
+  /* Section divider line */
+  .section-divider {
+    position: relative;
+    height: 2px;
+    background: linear-gradient(to right, var(--text-primary), transparent 50%, transparent 50%, var(--text-primary));
+    background-size: 20px 100%;
+  }
+
+  .section-divider-dotted {
+    position: relative;
+    height: 1px;
+    background-image: radial-gradient(circle, var(--text-primary) 1px, transparent 1px);
+    background-size: 8px 2px;
+    background-repeat: repeat-x;
+  }
+
+  /* Dotted title with decorative elements */
   .dotted-title {
     display: flex;
     align-items: center;
@@ -87,7 +171,52 @@ body {
     content: "···";
     font-family: var(--font-jetbrains), monospace;
     font-size: 1rem;
-    color: var(--folder-tab);
+    color: var(--text-primary);
     letter-spacing: 2px;
+  }
+
+  /* Card hover shadow enhancement */
+  .card-frame {
+    position: relative;
+    background: var(--background);
+    border: 1.5px solid var(--text-primary);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+  }
+
+  .card-frame:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Accent bar for headers */
+  .accent-bar-top {
+    position: relative;
+    padding-top: 12px;
+  }
+
+  .accent-bar-top::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--text-primary);
+  }
+
+  .accent-bar-bottom {
+    position: relative;
+    padding-bottom: 12px;
+  }
+
+  .accent-bar-bottom::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--text-primary);
   }
 }
