@@ -19,7 +19,7 @@ export const faqs: FAQ[] = [
   },
   {
     question: "CAN I USE THESE TOOLS ON COMMERCIAL PROJECTS?",
-    answer: "Yes! All Doron Supply tools come with a commercial license. You can use them on unlimited personal and commercial projects. You cannot resell the tools themselves or include them as-is in end products.",
+    answer: "Yes! All Tassofly tools come with a commercial license. You can use them on unlimited personal and commercial projects. You cannot resell the tools themselves or include them as-is in end products.",
   },
   {
     question: "CAN I USE YOUR TOOLS ON DESIGN PROGRAMS OTHER THAN PHOTOSHOP?",
@@ -27,6 +27,6 @@ export const faqs: FAQ[] = [
   },
   {
     question: "WHEN WILL MY ORDER SHIP?",
-    answer: "All Doron Supply products are digital downloads — there is no physical shipping. You'll have immediate access to your files right after purchase.",
+    answer: "All Tassofly products are digital downloads — there is no physical shipping. You'll have immediate access to your files right after purchase.",
   },
 ];

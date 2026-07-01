@@ -25,6 +25,12 @@ export default function PopularBundles() {
 
   useEffect(() => {
     async function fetchBundles() {
+      // Fetch all products and bundle_products for populating products in bundles
+      const [{ data: allProducts }, { data: bundleProducts }] = await Promise.all([
+        supabase.from("products").select("*").eq("is_active", true),
+        supabase.from("bundle_products").select("bundle_id, product_id").order("sort_order"),
+      ]);
+
       // Try to get featured bundles from section_items for popular_bundles section
       const { data: section } = await supabase
         .from("homepage_sections")
@@ -50,10 +56,36 @@ export default function PopularBundles() {
             .eq("is_active", true);
 
           if (bundles && bundles.length > 0) {
-            const sorted = bundleIds
-              .map((id: string) => bundles.find((b) => b.id === id))
-              .filter(Boolean);
-            setDisplayBundles(sorted.map(dbToBundle));
+            // Populate products in bundles
+            const bundleProductMap = new Map<string, string[]>();
+            bundleProducts?.forEach((bp: any) => {
+              const bundleId = bp.bundle_id as string;
+              if (!bundleProductMap.has(bundleId)) {
+                bundleProductMap.set(bundleId, []);
+              }
+              bundleProductMap.get(bundleId)!.push(bp.product_id as string);
+            });
+
+            const sorted: typeof staticBundles = bundleIds
+              .map((id: string) => {
+                const bundle = bundles.find((b) => b.id === id);
+                if (!bundle) return null;
+                
+                const transformed = dbToBundle(bundle);
+                const productIds = bundleProductMap.get(bundle.id);
+                if (productIds) {
+                  transformed.products = productIds
+                    .map(productId => {
+                      const product = allProducts?.find((p: any) => p.id === productId);
+                      return product?.slug || productId;
+                    })
+                    .filter(Boolean);
+                }
+                return transformed;
+              })
+              .filter(Boolean) as typeof staticBundles;
+
+            setDisplayBundles(sorted);
             return;
           }
         }
@@ -68,7 +100,31 @@ export default function PopularBundles() {
         .limit(6);
 
       if (allBundles && allBundles.length > 0) {
-        setDisplayBundles(allBundles.map(dbToBundle));
+        // Populate products in bundles
+        const bundleProductMap = new Map<string, string[]>();
+        bundleProducts?.forEach((bp: any) => {
+          const bundleId = bp.bundle_id as string;
+          if (!bundleProductMap.has(bundleId)) {
+            bundleProductMap.set(bundleId, []);
+          }
+          bundleProductMap.get(bundleId)!.push(bp.product_id as string);
+        });
+
+        const populatedBundles = allBundles.map((bundle: any) => {
+          const transformed = dbToBundle(bundle);
+          const productIds = bundleProductMap.get(bundle.id);
+          if (productIds) {
+            transformed.products = productIds
+              .map(productId => {
+                const product = allProducts?.find((p: any) => p.id === productId);
+                return product?.slug || productId;
+              })
+              .filter(Boolean);
+          }
+          return transformed;
+        });
+
+        setDisplayBundles(populatedBundles);
       }
       // else keep static fallback
     }

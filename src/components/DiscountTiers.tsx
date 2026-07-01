@@ -1,18 +1,33 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { fetchDiscountTiers, formatTierDisplay, DiscountTier } from "@/lib/discount-tiers";
 import ScrollReveal from "./ScrollReveal";
 
-const tiers = [
-  { discount: "15%", label: "OFF", items: "2+ Items" },
-  { discount: "20%", label: "OFF", items: "5+ Items" },
-  { discount: "25%", label: "OFF", items: "8+ Items" },
-];
-
 export default function DiscountTiers() {
+  const [tiers, setTiers] = useState<DiscountTier[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadTiers() {
+      setLoading(true);
+      const fetchedTiers = await fetchDiscountTiers();
+      setTiers(fetchedTiers);
+      setLoading(false);
+    }
+    loadTiers();
+  }, []);
+
+  if (loading) {
+    return <div className="text-text-tertiary text-sm">Loading tiers...</div>;
+  }
+
+  const displayTiers = tiers.map(formatTierDisplay);
+
   return (
     <div className="grid grid-cols-3 gap-3">
-      {tiers.map((tier, i) => (
+      {displayTiers.map((tier, i) => (
         <ScrollReveal key={i} delay={i * 0.08}>
           <motion.div
             className="bg-white border border-[rgba(0,0,0,0.12)] rounded-[6px] px-4 py-6 text-center hover:border-[rgba(0,0,0,0.25)] transition-colors duration-200"

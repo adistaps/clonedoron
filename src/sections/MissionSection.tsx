@@ -20,7 +20,7 @@ export default function MissionSection() {
               </h2>
             </div>
             <a
-              href="https://youtube.com/@DoronStudio"
+              href="https://youtube.com/@TassoflyDesign"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-[#f0f0f0] text-text-primary rounded-[5px] px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.06em] hover:bg-[#e5e5e5] border border-[rgba(0,0,0,0.08)] transition-colors duration-200 shrink-0"

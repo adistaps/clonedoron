@@ -16,6 +16,7 @@ function dbToProduct(row: Record<string, unknown>) {
     name: row.name as string,
     type: (row.type as string) || "",
     category: "",
+    subcategory: "",
     price: (row.price as number) || 0,
     image: (row.image_url as string) || "",
     description: (row.description as string) || "",

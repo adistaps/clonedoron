@@ -29,7 +29,7 @@ export default function AboutPage() {
               <span className="font-mono text-[14px] text-text-tertiary tracking-[0.2em] leading-none">&#183;&#183;&#183;</span>
             </div>
             <h1 className="font-display text-display-l md:text-display-xl text-text-primary max-w-4xl mx-auto leading-tight">
-              This Charming Asshole Runs Your Favorite Asset Shop.
+              Meet the Creative Mind Behind Tassofly.
             </h1>
           </ScrollReveal>
         </section>
@@ -50,7 +50,7 @@ export default function AboutPage() {
                 </h2>
                 <div className="space-y-6 font-mono text-body text-text-secondary leading-relaxed">
                   <p>
-                    Welcome :) I&apos;m Doron - a freelance designer 10 years into the apparel and design game. My heart lies in the threads that weave each t-shirt I&apos;ve made, and on the circuits that inline my work machine (an exhausted Macbook). I&apos;m forever glad I journeyed into the world of design. But it wasn&apos;t so simple.
+                    Welcome :) I&apos;m Arif - a freelance designer and founder of Tassofly. After 10 years in the apparel and design space, I realized many amazing techniques weren&apos;t accessible to newer designers. My mission is to democratize professional design tools and empower the next generation of creators worldwide.
                   </p>
                   <p>
                     When I first began, trying to figure out what all my favorite designers were doing was like getting blood from a stone. It costed me hundreds of eye-scorching hours to start designing the way I wanted to. But I was left wondering:
@@ -106,7 +106,7 @@ export default function AboutPage() {
                 </h2>
               </div>
               <a
-                href="https://youtube.com/@DoronStudio"
+                href="https://youtube.com/@TassoflyDesign"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-bg-secondary text-text-primary border border-[rgba(0,0,0,0.08)] rounded-button px-5 py-3 font-mono text-button uppercase tracking-[0.06em] hover:bg-bg-tertiary transition-colors duration-200 shrink-0"

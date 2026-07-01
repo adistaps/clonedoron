@@ -24,10 +24,10 @@ export default function Footer() {
                 />
               </svg>
               <p className="font-mono text-label uppercase tracking-[0.1em] text-text-primary mb-1">
-                DORONSUPPLY:
+                TASSOFLY:
               </p>
               <p className="font-mono text-body-sm uppercase tracking-[0.05em] text-text-secondary">
-                BEYOND THE BASICS.
+                DESIGN TOOLS FOR CREATORS.
               </p>
             </div>
 
@@ -50,7 +50,7 @@ export default function Footer() {
 
               <div className="flex flex-col gap-2.5">
                 <Link
-                  href="https://instagram.com/doronsupply"
+                  href="https://instagram.com/tassofly"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-mono text-body-sm uppercase tracking-[0.04em] text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1.5"
@@ -67,7 +67,7 @@ export default function Footer() {
 
               <div className="flex flex-col gap-2.5">
                 <Link
-                  href="https://youtube.com/@DoronStudio"
+                  href="https://youtube.com/@TassoflyDesign"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-mono text-body-sm uppercase tracking-[0.04em] text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1.5"
@@ -108,7 +108,7 @@ export default function Footer() {
                 Earn $$ Using Our Tools
               </h3>
               <p className="font-mono text-body-sm uppercase tracking-[0.04em] text-text-secondary mb-6 leading-relaxed">
-                EARN UP TO $500 BY CREATING CONTENT USING DORON SUPPLY TOOLS.
+                EARN UP TO $500 BY CREATING CONTENT USING TASSOFLY TOOLS.
               </p>
             </div>
 
@@ -127,7 +127,7 @@ export default function Footer() {
           {/* Copyright Cell (Spans 2 columns) */}
           <div className="col-span-2 px-6 py-4 md:px-8 flex items-center justify-center md:justify-start">
             <p className="font-mono text-body-sm uppercase tracking-[0.04em] text-text-tertiary">
-              &copy;2026, DORON STUDIO LLC
+              &copy;2026, TASSOFLY INC
             </p>
           </div>
 
