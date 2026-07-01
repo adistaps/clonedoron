@@ -66,7 +66,7 @@ export default function PopularBundles() {
               bundleProductMap.get(bundleId)!.push(bp.product_id as string);
             });
 
-            const sorted = bundleIds
+            const sorted: typeof staticBundles = bundleIds
               .map((id: string) => {
                 const bundle = bundles.find((b) => b.id === id);
                 if (!bundle) return null;
@@ -83,7 +83,7 @@ export default function PopularBundles() {
                 }
                 return transformed;
               })
-              .filter(Boolean);
+              .filter(Boolean) as typeof staticBundles;
 
             setDisplayBundles(sorted);
             return;

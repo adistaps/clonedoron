@@ -90,7 +90,7 @@ export default function BundlesPage() {
         });
 
         // Map bundle data and populate products array with product slugs
-        const bundlesWithProducts = dbBundles.map((bundle: any) => {
+        const bundlesWithProducts: typeof staticBundles = dbBundles.map((bundle: any) => {
           const transformedBundle = dbToBundle(bundle);
           const productIds = bundleProductMap.get(bundle.id);
           
@@ -105,12 +105,13 @@ export default function BundlesPage() {
               .filter(Boolean);
           }
           
-          return transformedBundle;
+          return transformedBundle as typeof staticBundles[0];
         });
 
-        setBundles(bundlesWithProducts as typeof staticBundles);
+        setBundles(bundlesWithProducts);
       } else if (dbBundles && dbBundles.length > 0) {
-        setBundles(dbBundles.map(dbToBundle) as typeof staticBundles);
+        const fallbackBundles: typeof staticBundles = dbBundles.map(dbToBundle) as typeof staticBundles;
+        setBundles(fallbackBundles);
       }
 
       setLoading(false);

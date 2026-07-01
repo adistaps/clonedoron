@@ -15,9 +15,9 @@ interface FAQ {
 }
 
 const helpCategories = [
-  { label: "MY ORDER / EMAIL", href: "https://help.doron.supply/" },
-  { label: "PRODUCT INSTALLATION / ACTIVATION", href: "https://help.doron.supply/en/categories/product-usage" },
-  { label: "USING A PRODUCT", href: "https://support.doron.supply/" },
+  { label: "MY ORDER / EMAIL", href: "https://help.tassofly.com/" },
+  { label: "PRODUCT INSTALLATION / ACTIVATION", href: "https://help.tassofly.com/en/categories/product-usage" },
+  { label: "USING A PRODUCT", href: "https://support.tassofly.com/" },
 ];
 
 export default function SupportPage() {
@@ -88,7 +88,7 @@ export default function SupportPage() {
         <ScrollReveal>
           <p className="font-mono text-body-sm uppercase tracking-[0.04em] text-text-secondary text-center max-w-lg mx-auto leading-relaxed">
             SEND US A MESSAGE USING THE CHAT WIDGET IN THE BOTTOM RIGHT CORNER OF YOUR SCREEN, OR{" "}
-            <a href="mailto:support@doronsupply.com" className="underline hover:text-text-primary transition-colors">
+            <a href="mailto:support@tassofly.com" className="underline hover:text-text-primary transition-colors">
               VIA EMAIL
             </a>
             .
