@@ -334,11 +334,17 @@ async function seedProducts() {
   console.log('🌱 Starting product seed...\n');
 
   try {
+    // Add SKU to each product (required by schema)
+    const productsWithSku = productsData.map(product => ({
+      ...product,
+      sku: product.slug.toUpperCase().replace(/-/g, '_'),
+    }));
+
     // Insert products
-    console.log(`📦 Inserting ${productsData.length} products...`);
+    console.log(`📦 Inserting ${productsWithSku.length} products...`);
     const { data: inserted, error: insertError } = await supabase
       .from('products')
-      .insert(productsData)
+      .insert(productsWithSku)
       .select();
 
     if (insertError) {
