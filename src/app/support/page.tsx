@@ -1,9 +1,18 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { ExternalLink } from "lucide-react";
 import FAQAccordion from "@/components/FAQAccordion";
 import ScrollReveal from "@/components/ScrollReveal";
-import { faqs } from "@/data/faqs";
+import { supabase } from "@/lib/supabase";
+import { faqs as staticFaqs } from "@/data/faqs";
+
+interface FAQ {
+  id: string;
+  question: string;
+  answer: string;
+  is_active: boolean;
+}
 
 const helpCategories = [
   { label: "MY ORDER / EMAIL", href: "https://help.doron.supply/" },
@@ -12,6 +21,32 @@ const helpCategories = [
 ];
 
 export default function SupportPage() {
+  const [displayFaqs, setDisplayFaqs] = useState(staticFaqs);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchFaqs() {
+      try {
+        const { data: faqs } = await supabase
+          .from("faqs")
+          .select("*")
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true });
+
+        if (faqs && faqs.length > 0) {
+          setDisplayFaqs(faqs);
+        }
+      } catch (error) {
+        console.error("Failed to fetch FAQs:", error);
+        // Use static fallback
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchFaqs();
+  }, []);
+
   return (
     <div className="pt-20 pb-16">
       {/* Hero */}
@@ -77,7 +112,8 @@ export default function SupportPage() {
             </ScrollReveal>
 
             <ScrollReveal delay={0.1}>
-              <FAQAccordion faqs={faqs} />
+              {!loading && <FAQAccordion faqs={displayFaqs} />}
+              {loading && <p className="text-text-tertiary font-mono text-sm">Loading FAQs...</p>}
             </ScrollReveal>
           </div>
         </div>
