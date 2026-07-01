@@ -1,11 +1,81 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import SectionHeader from "@/components/SectionHeader";
 import BundleCard from "@/components/BundleCard";
 import ScrollReveal from "@/components/ScrollReveal";
-import { bundles } from "@/data/bundles";
+import { supabase } from "@/lib/supabase";
+import { bundles as staticBundles } from "@/data/bundles";
+
+// Map DB row → BundleCard format
+function dbToBundle(row: Record<string, unknown>) {
+  return {
+    id: (row.slug as string) || (row.id as string),
+    slug: (row.slug as string) || (row.id as string),
+    name: row.name as string,
+    color: (row.color as string) || "#A3A3A3",
+    saveAmount: (row.save_amount as number) || 0,
+    image: (row.image_url as string) || "",
+    products: [] as string[],
+  };
+}
 
 export default function PopularBundles() {
+  const [displayBundles, setDisplayBundles] = useState(staticBundles.slice(0, 6));
+
+  useEffect(() => {
+    async function fetchBundles() {
+      // Try to get featured bundles from section_items for popular_bundles section
+      const { data: section } = await supabase
+        .from("homepage_sections")
+        .select("id")
+        .eq("key", "popular_bundles")
+        .single();
+
+      if (section?.id) {
+        const { data: items } = await supabase
+          .from("section_items")
+          .select("item_id, sort_order")
+          .eq("section_id", section.id)
+          .eq("item_type", "bundle")
+          .order("sort_order", { ascending: true })
+          .limit(6);
+
+        if (items && items.length > 0) {
+          const bundleIds = items.map((i: { item_id: string }) => i.item_id);
+          const { data: bundles } = await supabase
+            .from("bundles")
+            .select("*")
+            .in("id", bundleIds)
+            .eq("is_active", true);
+
+          if (bundles && bundles.length > 0) {
+            const sorted = bundleIds
+              .map((id: string) => bundles.find((b) => b.id === id))
+              .filter(Boolean);
+            setDisplayBundles(sorted.map(dbToBundle));
+            return;
+          }
+        }
+      }
+
+      // Fallback: latest 6 active bundles from DB
+      const { data: allBundles } = await supabase
+        .from("bundles")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(6);
+
+      if (allBundles && allBundles.length > 0) {
+        setDisplayBundles(allBundles.map(dbToBundle));
+      }
+      // else keep static fallback
+    }
+
+    fetchBundles();
+  }, []);
+
   return (
     <section className="py-20 px-6 border-b border-[rgba(0,0,0,0.1)]">
       <div className="max-w-content mx-auto">
@@ -19,7 +89,7 @@ export default function PopularBundles() {
 
         {/* 2 rows × 3 columns of bundle cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {bundles.slice(0, 6).map((bundle, i) => (
+          {displayBundles.map((bundle, i) => (
             <ScrollReveal key={bundle.id} delay={i * 0.06}>
               <BundleCard bundle={bundle} />
             </ScrollReveal>

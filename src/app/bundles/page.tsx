@@ -1,35 +1,85 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Plus } from "lucide-react";
 import BundleCard from "@/components/BundleCard";
 import DiscountTiers from "@/components/DiscountTiers";
 import MarqueeTicker from "@/components/MarqueeTicker";
 import ScrollReveal from "@/components/ScrollReveal";
-import { bundles } from "@/data/bundles";
-import { products } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
+import { supabase } from "@/lib/supabase";
+import { bundles as staticBundles } from "@/data/bundles";
+import { products as staticProducts } from "@/data/products";
 
 const bundleMarqueeItems = ["[ bundle & save ]", "[ more files ]", "[ less $$ ]"];
 
 const bundleTabs = [
   { id: "all", label: "All Assets" },
-  { id: "tools", label: "Tools" },
-  { id: "mockups", label: "Mockups" },
+  { id: "plugin", label: "Plugins" },
   { id: "textures", label: "Textures" },
-  { id: "fonts", label: "Fonts" },
+  { id: "template", label: "Templates" },
+  { id: "font", label: "Fonts" },
   { id: "freebies", label: "Freebies" },
 ];
+
+function dbToBundle(row: Record<string, unknown>) {
+  return {
+    id: (row.slug as string) || (row.id as string),
+    slug: (row.slug as string) || (row.id as string),
+    name: row.name as string,
+    color: (row.color as string) || "#A3A3A3",
+    saveAmount: (row.save_amount as number) || 0,
+    image: (row.image_url as string) || "",
+    products: [] as string[],
+  };
+}
+
+function dbToProduct(row: Record<string, unknown>) {
+  return {
+    id: (row.slug as string) || (row.id as string),
+    slug: (row.slug as string) || (row.id as string),
+    name: row.name as string,
+    type: (row.type as string) || "",
+    category: "",
+    subcategory: "",
+    price: (row.price as number) || 0,
+    image: (row.image_url as string) || "",
+    description: (row.description as string) || "",
+    features: (row.features as string[]) || [],
+    includes: (row.includes as string[]) || [],
+    createdBy: (row.created_by as string) || "",
+    compatibility: (row.compatibility as string) || "",
+    isFreebie: (row.is_freebie as boolean) || false,
+  };
+}
 
 export default function BundlesPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [bundleItems, setBundleItems] = useState<string[]>([]);
+  const [bundles, setBundles] = useState(staticBundles);
+  const [products, setProducts] = useState(staticProducts);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+
+      const [{ data: dbBundles }, { data: dbProducts }] = await Promise.all([
+        supabase.from("bundles").select("*").eq("is_active", true).order("created_at", { ascending: false }),
+        supabase.from("products").select("*").eq("is_active", true).order("created_at", { ascending: false }),
+      ]);
+
+      if (dbBundles && dbBundles.length > 0) setBundles(dbBundles.map(dbToBundle) as typeof staticBundles);
+      if (dbProducts && dbProducts.length > 0) setProducts(dbProducts.map(dbToProduct) as typeof staticProducts);
+
+      setLoading(false);
+    }
+    loadData();
+  }, []);
 
   const toggleBundleItem = (productId: string) => {
     setBundleItems((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
+      prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
     );
   };
 
@@ -53,40 +103,10 @@ export default function BundlesPage() {
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       if (activeTab === "all") return true;
-      if (activeTab === "tools") {
-        return (
-          product.subcategory === "plugins-software" ||
-          product.subcategory === "actions-templates" ||
-          product.type.toLowerCase().includes("plugin") ||
-          product.type.toLowerCase().includes("action") ||
-          product.type.toLowerCase().includes("template")
-        );
-      }
-      if (activeTab === "mockups") {
-        return (
-          product.category === "mockups" ||
-          product.subcategory === "clothing" ||
-          product.type.toLowerCase().includes("mockup")
-        );
-      }
-      if (activeTab === "textures") {
-        return (
-          product.category === "textures" ||
-          product.type.toLowerCase().includes("texture")
-        );
-      }
-      if (activeTab === "fonts") {
-        return (
-          product.subcategory === "fonts-vector" ||
-          product.type.toLowerCase().includes("font")
-        );
-      }
-      if (activeTab === "freebies") {
-        return product.isFreebie;
-      }
-      return true;
+      if (activeTab === "freebies") return product.isFreebie;
+      return product.type?.toLowerCase().includes(activeTab.toLowerCase());
     });
-  }, [activeTab]);
+  }, [activeTab, products]);
 
   return (
     <div className="pt-20 pb-16">
@@ -100,7 +120,7 @@ export default function BundlesPage() {
             Bundle &amp; Save.
           </h1>
           <p className="font-mono text-body-sm uppercase tracking-[0.04em] text-text-secondary max-w-md mx-auto leading-relaxed">
-            MORE FILES IN YOUR FOLDER, LESS $$ OUT OF YOUR WALLET. CHOOSE FROM CURATED BUNDLES FOR A LARGER DISCOUNT OR BUILD YOUR OWN BUNDLE.
+            MORE FILES IN YOUR FOLDER, LESS $$ OUT OF YOUR WALLET. CHOOSE FROM CURATED BUNDLES OR BUILD YOUR OWN.
           </p>
         </ScrollReveal>
       </section>
@@ -111,13 +131,17 @@ export default function BundlesPage() {
       {/* Bundle Cards */}
       <section className="py-section px-6">
         <div className="max-w-content mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {bundles.map((bundle, i) => (
-              <ScrollReveal key={bundle.id} delay={i * 0.1}>
-                <BundleCard bundle={bundle} />
-              </ScrollReveal>
-            ))}
-          </div>
+          {loading ? (
+            <div className="text-center py-8 font-mono text-text-tertiary">Loading bundles...</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {bundles.map((bundle, i) => (
+                <ScrollReveal key={bundle.id} delay={i * 0.1}>
+                  <BundleCard bundle={bundle} />
+                </ScrollReveal>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -130,22 +154,15 @@ export default function BundlesPage() {
                 <h2 className="font-display text-heading-m text-text-primary mb-2">
                   Legacy Bundle
                 </h2>
-                <p className="font-mono text-body text-accent-orange mb-1">
-                  Save $20+
-                </p>
-                <p className="font-mono text-body-sm text-text-secondary uppercase">
-                  20+ Legacy Mockups
-                </p>
+                <p className="font-mono text-body text-accent-orange mb-1">Save $20+</p>
+                <p className="font-mono text-body-sm text-text-secondary uppercase">20+ Legacy Mockups</p>
               </div>
             </ScrollReveal>
-
             <ScrollReveal delay={0.1}>
               <div>
-                <h2 className="font-display text-display-s text-text-primary mb-3">
-                  Mix &amp; Match
-                </h2>
+                <h2 className="font-display text-display-s text-text-primary mb-3">Mix &amp; Match</h2>
                 <p className="font-mono text-body text-text-secondary mb-6">
-                  Design your perfect bundle by selecting 3 or more products. Enjoy more savings as you add more items.
+                  Design your perfect bundle by selecting 3 or more products.
                 </p>
                 <DiscountTiers />
               </div>
@@ -162,14 +179,10 @@ export default function BundlesPage() {
             <ScrollReveal>
               <div className="bg-bg-secondary border border-[#CCCCCC] rounded-card p-4 mb-8 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-6">
-                  <span className="font-mono text-body text-text-primary">
-                    {bundleItems.length} Items
-                  </span>
-                  <span className="font-mono text-body text-accent-orange">
-                    Save: ${savings.toFixed(2)} USD
-                  </span>
+                  <span className="font-mono text-body text-text-primary">{bundleItems.length} Items</span>
+                  <span className="font-mono text-body text-accent-orange">Save: ${savings.toFixed(2)} USD</span>
                   <span className="font-mono text-body text-text-secondary">
-                    Total cost: <span className="text-text-primary font-medium">${total.toFixed(2)}</span>
+                    Total: <span className="text-text-primary font-medium">${total.toFixed(2)}</span>
                   </span>
                 </div>
                 <button className="bg-accent-purple text-white rounded-button px-5 py-2.5 font-mono text-button uppercase tracking-[0.06em] hover:bg-accent-purple-hover transition-colors duration-200">

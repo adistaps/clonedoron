@@ -7,8 +7,29 @@ import ProductCard from "@/components/ProductCard";
 import CategoryFilter from "@/components/CategoryFilter";
 import DiscountTiers from "@/components/DiscountTiers";
 import ScrollReveal from "@/components/ScrollReveal";
-import { products } from "@/data/products";
-import { categories } from "@/data/categories";
+import { supabase } from "@/lib/supabase";
+import { products as staticProducts } from "@/data/products";
+import { categories as staticCategories } from "@/data/categories";
+
+// Map DB product row to frontend Product shape
+function dbToProduct(row: Record<string, unknown>) {
+  return {
+    id: (row.slug as string) || (row.id as string),
+    slug: (row.slug as string) || (row.id as string),
+    name: row.name as string,
+    type: (row.type as string) || "",
+    category: "",
+    subcategory: "",
+    price: (row.price as number) || 0,
+    image: (row.image_url as string) || "",
+    description: (row.description as string) || "",
+    features: (row.features as string[]) || [],
+    includes: (row.includes as string[]) || [],
+    createdBy: (row.created_by as string) || "",
+    compatibility: (row.compatibility as string) || "",
+    isFreebie: (row.is_freebie as boolean) || false,
+  };
+}
 
 function ShopContent() {
   const searchParams = useSearchParams();
@@ -16,13 +37,55 @@ function ShopContent() {
 
   const [selectedCategory, setSelectedCategory] = useState("all-assets");
   const [searchQuery, setSearchQuery] = useState("");
+  const [products, setProducts] = useState(staticProducts);
+  const [categories, setCategories] = useState(staticCategories);
+  const [loadingProducts, setLoadingProducts] = useState(true);
 
-  // Sync category state from URL query parameter on mount or URL change
+  // Sync category state from URL query parameter
   useEffect(() => {
-    if (categoryParam) {
-      setSelectedCategory(categoryParam);
-    }
+    if (categoryParam) setSelectedCategory(categoryParam);
   }, [categoryParam]);
+
+  // Fetch live data from Supabase
+  useEffect(() => {
+    async function loadData() {
+      setLoadingProducts(true);
+
+      // Load products
+      const { data: dbProducts } = await supabase
+        .from("products")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (dbProducts && dbProducts.length > 0) {
+        setProducts(dbProducts.map(dbToProduct) as typeof staticProducts);
+      }
+
+      // Load categories for filter sidebar
+      const { data: dbCats } = await supabase
+        .from("categories")
+        .select("*")
+        .order("sort_order", { ascending: true });
+
+      if (dbCats && dbCats.length > 0) {
+        // Build tree matching the CategoryFilter component format
+        const parents = dbCats.filter((c: { parent_id: string | null }) => !c.parent_id);
+        const built = parents.map((p: { id: string; slug: string; name: string }) => ({
+          id: p.slug,
+          name: p.name,
+          subcategories: dbCats
+            .filter((c: { parent_id: string }) => c.parent_id === p.id)
+            .map((c: { slug: string; name: string }) => ({ id: c.slug, name: c.name })),
+        }));
+        setCategories(built as typeof staticCategories);
+      }
+
+      setLoadingProducts(false);
+    }
+
+    loadData();
+  }, []);
 
   const handleSelectCategory = (cat: string) => {
     setSelectedCategory(cat);
@@ -34,46 +97,30 @@ function ShopContent() {
   const filteredProducts = useMemo(() => {
     let filtered = products;
 
-    // Filter by category
     if (selectedCategory && selectedCategory !== "all-assets") {
       filtered = filtered.filter((p) => {
-        // Parent category mapping
-        if (selectedCategory === "assets") return p.category === "assets";
-        if (selectedCategory === "textures") return p.category === "textures";
-        if (selectedCategory === "mockups") return p.category === "mockups" || p.subcategory === "clothing";
-        if (selectedCategory === "tools") return p.subcategory === "plugins-software" || p.subcategory === "actions-templates";
-        if (selectedCategory === "fonts") return p.subcategory === "fonts-vector";
-        if (selectedCategory === "freebies") return p.isFreebie;
-        if (selectedCategory === "bundles") return false; // Main product list doesn't show bundles
-
-        // Subcategory mapping
-        if (selectedCategory === "plugins-software") return p.subcategory === "plugins-software";
-        if (selectedCategory === "actions-templates") return p.subcategory === "actions-templates";
-        if (selectedCategory === "fonts-vector") return p.subcategory === "fonts-vector";
-        if (selectedCategory === "all-textures") return p.category === "textures";
-        if (selectedCategory === "analog-print") return p.subcategory === "analog-print";
-        if (selectedCategory === "vintage-merch") return p.subcategory === "vintage-merch";
-        if (selectedCategory === "clothing") return p.subcategory === "clothing";
-        if (selectedCategory === "all-bundles") return false;
-        if (selectedCategory === "popular") return ["dithertone-pro", "worn-plastisol-2", "printer-noise", "mobglow"].includes(p.id);
-        if (selectedCategory === "best-sellers") return ["dithertone-pro", "vintone", "worn-plastisol-2"].includes(p.id);
-        if (selectedCategory === "free") return p.isFreebie;
-        return true;
+        if (selectedCategory === "freebies" || selectedCategory === "free") return p.isFreebie;
+        // Match by category slug or subcategory slug stored in the product
+        return (
+          (p as unknown as { category?: string }).category === selectedCategory ||
+          (p as unknown as { subcategory?: string }).subcategory === selectedCategory ||
+          p.type?.toLowerCase().includes(selectedCategory.toLowerCase())
+        );
       });
     }
 
-    // Filter by search
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      filtered = filtered.filter((p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.type.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q)
+      filtered = filtered.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.type?.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q)
       );
     }
 
     return filtered;
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, products]);
 
   return (
     <div className="pt-20 pb-16 px-6">
@@ -126,10 +173,8 @@ function ShopContent() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-display text-display-s text-text-primary">
                   {selectedCategory === "all-assets"
-                    ? "All Assets"
-                    : categories.find((c) => c.id === selectedCategory)?.name ||
-                      categories.flatMap((c) => c.subcategories).find((s) => s.id === selectedCategory)?.name ||
-                      selectedCategory.toUpperCase()}
+                    ? `All Assets (${filteredProducts.length})`
+                    : `${selectedCategory.replace(/-/g, " ").toUpperCase()} (${filteredProducts.length})`}
                 </h2>
                 <div className="relative w-60">
                   <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
@@ -144,21 +189,29 @@ function ShopContent() {
               </div>
             </ScrollReveal>
 
-            {/* Product Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredProducts.map((product, i) => (
-                <ScrollReveal key={product.id} delay={i * 0.03}>
-                  <ProductCard product={product} />
-                </ScrollReveal>
-              ))}
-            </div>
-
-            {filteredProducts.length === 0 && (
-              <div className="text-center py-16">
-                <p className="font-mono text-body text-text-tertiary uppercase">
-                  No products found
-                </p>
+            {loadingProducts ? (
+              <div className="py-16 text-center text-text-tertiary font-mono text-sm">
+                Loading products...
               </div>
+            ) : (
+              <>
+                {/* Product Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {filteredProducts.map((product, i) => (
+                    <ScrollReveal key={product.id} delay={i * 0.03}>
+                      <ProductCard product={product} />
+                    </ScrollReveal>
+                  ))}
+                </div>
+
+                {filteredProducts.length === 0 && (
+                  <div className="text-center py-16">
+                    <p className="font-mono text-body text-text-tertiary uppercase">
+                      No products found
+                    </p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

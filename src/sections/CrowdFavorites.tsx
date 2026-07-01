@@ -1,19 +1,92 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import SectionHeader from "@/components/SectionHeader";
 import ProductCard from "@/components/ProductCard";
 import CornerDots from "@/components/CornerDots";
 import ScrollReveal from "@/components/ScrollReveal";
-import { products } from "@/data/products";
+import { supabase } from "@/lib/supabase";
+import { products as staticProducts } from "@/data/products";
 
-const favoriteProducts = [
-  products[0], // DITHERTONE Pro
-  products[2], // Printer Noise Textures
-  products[1], // Worn Plastisol 2
-  products[3], // mobGlow
-];
+// Map DB row → format ProductCard expects
+function dbToProduct(row: Record<string, unknown>) {
+  return {
+    id: (row.slug as string) || (row.id as string),
+    slug: (row.slug as string) || (row.id as string),
+    name: row.name as string,
+    type: (row.type as string) || "",
+    category: "",
+    price: (row.price as number) || 0,
+    image: (row.image_url as string) || "",
+    description: (row.description as string) || "",
+    features: (row.features as string[]) || [],
+    includes: (row.includes as string[]) || [],
+    createdBy: (row.created_by as string) || "",
+    compatibility: (row.compatibility as string) || "",
+    isFreebie: (row.is_freebie as boolean) || false,
+  };
+}
 
 export default function CrowdFavorites() {
+  const [favoriteProducts, setFavoriteProducts] = useState(
+    // default to first 4 static products while loading
+    [staticProducts[0], staticProducts[2], staticProducts[1], staticProducts[3]]
+  );
+
+  useEffect(() => {
+    async function fetchFromSupabase() {
+      // 1. Get the crowd_favorites section id
+      const { data: section } = await supabase
+        .from("homepage_sections")
+        .select("id")
+        .eq("key", "crowd_favorites")
+        .single();
+
+      if (section?.id) {
+        // 2. Get linked product ids from section_items
+        const { data: items } = await supabase
+          .from("section_items")
+          .select("item_id, sort_order")
+          .eq("section_id", section.id)
+          .eq("item_type", "product")
+          .order("sort_order", { ascending: true })
+          .limit(4);
+
+        if (items && items.length > 0) {
+          const productIds = items.map((i: { item_id: string }) => i.item_id);
+          const { data: products } = await supabase
+            .from("products")
+            .select("*")
+            .in("id", productIds)
+            .eq("is_active", true);
+
+          if (products && products.length > 0) {
+            // sort by original section_items order
+            const sorted = productIds
+              .map((id: string) => products.find((p) => p.id === id))
+              .filter(Boolean);
+            setFavoriteProducts(sorted.map(dbToProduct));
+            return;
+          }
+        }
+      }
+
+      // Fallback: just fetch top 4 active products from DB
+      const { data: topProducts } = await supabase
+        .from("products")
+        .select("*")
+        .eq("is_active", true)
+        .limit(4);
+
+      if (topProducts && topProducts.length > 0) {
+        setFavoriteProducts(topProducts.map(dbToProduct));
+      }
+      // else keep static fallback
+    }
+
+    fetchFromSupabase();
+  }, []);
+
   return (
     <section className="relative py-20 px-6 border-b border-[rgba(0,0,0,0.1)]">
       <div className="max-w-content mx-auto relative">

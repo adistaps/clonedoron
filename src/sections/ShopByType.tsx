@@ -1,15 +1,17 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import SectionHeader from "@/components/SectionHeader";
 import ScrollReveal from "@/components/ScrollReveal";
+import { supabase } from "@/lib/supabase";
 
-const categories = [
-  { id: "assets", label: "[ASSETS]" },
-  { id: "texture", label: "[TEXTURE]" },
-  { id: "mockups", label: "[MOCKUPS]" },
-  { id: "bundles", label: "[BUNDLES]" },
-  { id: "vector", label: "[VECTOR]" },
+const STATIC_CATEGORIES = [
+  { id: "assets", slug: "assets", label: "[ASSETS]" },
+  { id: "texture", slug: "textures", label: "[TEXTURE]" },
+  { id: "mockups", slug: "mockups", label: "[MOCKUPS]" },
+  { id: "bundles", slug: "bundles", label: "[BUNDLES]" },
+  { id: "vector", slug: "vector", label: "[VECTOR]" },
 ];
 
 const config = [
@@ -20,7 +22,34 @@ const config = [
   { rotate: -0.3, bottom: 0, width: 250, overlap: -65 },
 ];
 
+type CatItem = { id: string; slug: string; label: string };
+
 export default function ShopByType() {
+  const [categories, setCategories] = useState<CatItem[]>(STATIC_CATEGORIES);
+
+  useEffect(() => {
+    async function fetchCategories() {
+      const { data } = await supabase
+        .from("categories")
+        .select("id, slug, name")
+        .is("parent_id", null)
+        .order("sort_order", { ascending: true });
+
+      if (data && data.length > 0) {
+        setCategories(
+          data.map((c: { id: string; slug: string; name: string }) => ({
+            id: c.id,
+            slug: c.slug,
+            label: `[${c.name.toUpperCase()}]`,
+          }))
+        );
+      }
+    }
+    fetchCategories();
+  }, []);
+
+  const displayCats = categories.slice(0, 5);
+
   return (
     <section className="py-20 px-6 border-b border-[rgba(0,0,0,0.1)]">
       <div className="max-w-content mx-auto">
@@ -34,18 +63,18 @@ export default function ShopByType() {
 
         {/* Overlapping folder cards */}
         <div className="flex items-end justify-center mt-10 overflow-hidden" style={{ paddingBottom: "28px" }}>
-          {categories.map((cat, i) => {
-            const c = config[i];
+          {displayCats.map((cat, i) => {
+            const c = config[i] || config[config.length - 1];
             return (
               <ScrollReveal key={cat.id} delay={i * 0.06}>
                 <Link
-                  href={`/shop?category=${cat.id}`}
+                  href={`/category/${cat.slug}`}
                   className="flex-shrink-0 flex flex-col group cursor-pointer"
                   style={{
                     width: `${c.width}px`,
                     marginLeft: i === 0 ? 0 : `${c.overlap}px`,
                     marginBottom: `${c.bottom}px`,
-                    zIndex: categories.length - i,
+                    zIndex: displayCats.length - i,
                     transform: `rotate(${c.rotate}deg)`,
                     position: "relative",
                     transition: "transform 0.3s ease, z-index 0s",
@@ -57,7 +86,7 @@ export default function ShopByType() {
                   }}
                   onMouseLeave={(e) => {
                     const el = e.currentTarget as HTMLElement;
-                    el.style.zIndex = String(categories.length - i);
+                    el.style.zIndex = String(displayCats.length - i);
                     el.style.transform = `rotate(${c.rotate}deg)`;
                   }}
                 >
@@ -90,7 +119,6 @@ export default function ShopByType() {
                     }}
                     className="group-hover:shadow-md transition-shadow duration-300"
                   >
-                    {/* Replace with <img> when images are ready */}
                     <span className="font-mono text-[11px] text-[#bbb] uppercase tracking-[0.1em]">
                       {cat.label}
                     </span>
