@@ -66,15 +66,52 @@ export default function BundlesPage() {
     async function loadData() {
       setLoading(true);
 
-      const [{ data: dbBundles }, { data: dbProducts }, fetchedTiers] = await Promise.all([
+      const [{ data: dbBundles }, { data: dbProducts }, { data: bundleProducts }, fetchedTiers] = await Promise.all([
         supabase.from("bundles").select("*").eq("is_active", true).order("created_at", { ascending: false }),
         supabase.from("products").select("*").eq("is_active", true).order("created_at", { ascending: false }),
+        supabase.from("bundle_products").select("bundle_id, product_id").order("sort_order"),
         fetchDiscountTiers(),
       ]);
 
-      if (dbBundles && dbBundles.length > 0) setBundles(dbBundles.map(dbToBundle) as typeof staticBundles);
       if (dbProducts && dbProducts.length > 0) setProducts(dbProducts.map(dbToProduct) as typeof staticProducts);
       setTiers(fetchedTiers);
+
+      // Populate bundle products by resolving product_ids to actual product slugs
+      if (dbBundles && dbBundles.length > 0 && bundleProducts && bundleProducts.length > 0) {
+        const bundleProductMap = new Map<string, string[]>();
+        
+        // Group bundle_products by bundle_id
+        bundleProducts.forEach((bp: any) => {
+          const bundleId = bp.bundle_id as string;
+          if (!bundleProductMap.has(bundleId)) {
+            bundleProductMap.set(bundleId, []);
+          }
+          bundleProductMap.get(bundleId)!.push(bp.product_id as string);
+        });
+
+        // Map bundle data and populate products array with product slugs
+        const bundlesWithProducts = dbBundles.map((bundle: any) => {
+          const transformedBundle = dbToBundle(bundle);
+          const productIds = bundleProductMap.get(bundle.id);
+          
+          if (productIds) {
+            // Find product slugs for these IDs
+            transformedBundle.products = productIds
+              .map(productId => {
+                // Find product in dbProducts by matching the product_id (which is the id from products table)
+                const product = dbProducts?.find((p: any) => p.id === productId);
+                return product?.slug || productId;
+              })
+              .filter(Boolean);
+          }
+          
+          return transformedBundle;
+        });
+
+        setBundles(bundlesWithProducts as typeof staticBundles);
+      } else if (dbBundles && dbBundles.length > 0) {
+        setBundles(dbBundles.map(dbToBundle) as typeof staticBundles);
+      }
 
       setLoading(false);
     }
