@@ -1,22 +1,109 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Plus, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getProductBySlug, getRelatedProducts } from "@/data/products";
+import { supabase } from "@/lib/supabase";
 import ProductCard from "@/components/ProductCard";
 import ScrollReveal from "@/components/ScrollReveal";
 import SectionHeader from "@/components/SectionHeader";
+
+interface Product {
+  id: string;
+  slug: string;
+  name: string;
+  type: string;
+  category_id: string;
+  price: number;
+  image_url: string;
+  description: string;
+  features: string[];
+  includes: string[];
+  created_by: string;
+  compatibility: string;
+}
 
 interface ProductDetailClientProps {
   slug: string;
 }
 
+// Transform DB product to component format
+function dbToProduct(row: Record<string, unknown>) {
+  return {
+    id: row.slug as string,
+    slug: row.slug as string,
+    name: row.name as string,
+    type: row.type as string,
+    category: "",
+    subcategory: "",
+    price: (row.price as number) || 0,
+    image: (row.image_url as string) || "",
+    description: (row.description as string) || "",
+    features: (row.features as string[]) || [],
+    includes: (row.includes as string[]) || [],
+    createdBy: (row.created_by as string) || "",
+    compatibility: (row.compatibility as string) || "",
+    isFreebie: (row.is_freebie as boolean) || false,
+  } as const;
+}
+
+type ProductType = ReturnType<typeof dbToProduct>;
+
 export default function ProductDetailClient({ slug }: ProductDetailClientProps) {
-  const product = getProductBySlug(slug);
+  const [product, setProduct] = useState<ProductType | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<ProductType[]>([]);
+  const [loading, setLoading] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const relatedProducts = getRelatedProducts(slug);
+
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+
+      // Fetch main product
+      const { data: mainProduct } = await supabase
+        .from("products")
+        .select("*")
+        .eq("slug", slug)
+        .eq("is_active", true)
+        .single();
+
+      if (mainProduct) {
+        setProduct(dbToProduct(mainProduct));
+
+        // Fetch related products (same category_id or same type)
+        const { data: related } = await supabase
+          .from("products")
+          .select("*")
+          .eq("is_active", true)
+          .neq("slug", slug)
+          .or(
+            `category_id.eq.${mainProduct.category_id},type.eq.${mainProduct.type}`
+          )
+          .limit(4);
+
+        if (related && related.length > 0) {
+          setRelatedProducts(related.map(dbToProduct));
+        }
+      }
+
+      setLoading(false);
+    }
+
+    loadData();
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="pt-24 pb-16 px-6">
+        <div className="max-w-content mx-auto">
+          <div className="py-16 text-center text-text-tertiary font-mono text-sm uppercase">
+            Loading product...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) return null;
 
@@ -31,10 +118,6 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
         <ScrollReveal>
           <div className="flex items-center gap-2 font-mono text-body-sm uppercase text-text-tertiary mb-8">
             <Link href="/shop" className="hover:text-text-primary transition-colors">SHOP</Link>
-            <span>&rarr;</span>
-            <Link href={`/shop?category=${product.category}`} className="hover:text-text-primary transition-colors">
-              {product.category === "textures" ? "TEXTURES" : "ASSETS"}
-            </Link>
             <span>&rarr;</span>
             <span className="text-text-primary">{product.name.toUpperCase()}</span>
           </div>
