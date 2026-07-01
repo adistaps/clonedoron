@@ -71,16 +71,19 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
       if (mainProduct) {
         setProduct(dbToProduct(mainProduct));
 
-        // Fetch related products (same category_id or same type)
-        const { data: related } = await supabase
+        // Fetch related products by type (since category_id might be null in seed data)
+        let relatedQuery = supabase
           .from("products")
           .select("*")
           .eq("is_active", true)
-          .neq("slug", slug)
-          .or(
-            `category_id.eq.${mainProduct.category_id},type.eq.${mainProduct.type}`
-          )
-          .limit(4);
+          .neq("slug", slug);
+
+        // Filter by type if available, otherwise get any active products
+        if (mainProduct.type) {
+          relatedQuery = relatedQuery.eq("type", mainProduct.type);
+        }
+
+        const { data: related } = await relatedQuery.limit(4);
 
         if (related && related.length > 0) {
           setRelatedProducts(related.map(dbToProduct));
