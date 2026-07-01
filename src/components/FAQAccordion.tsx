@@ -17,11 +17,11 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
   };
 
   return (
-    <div className="border border-[rgba(0,0,0,0.1)] rounded-card overflow-hidden">
+    <div className="card-frame overflow-hidden">
       {faqs.map((faq, index) => (
         <div
           key={index}
-          className={`${index < faqs.length - 1 ? "border-b border-[rgba(0,0,0,0.08)]" : ""}`}
+          className={`${index < faqs.length - 1 ? "border-b border-[rgba(0,0,0,0.12)]" : ""}`}
         >
           <button
             onClick={() => toggle(index)}

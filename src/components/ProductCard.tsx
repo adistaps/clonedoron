@@ -37,8 +37,8 @@ export default function ProductCard({ product, showAddButton = true }: ProductCa
   return (
     <Link href={`/product/${product.slug}`}>
       <motion.div
-        className="folder-tab-card group cursor-pointer"
-        whileHover={{ y: -2 }}
+        className="card-frame group cursor-pointer accent-corner-tl accent-corner-tr accent-corner-bl accent-corner-br"
+        whileHover={{ y: -3, boxShadow: "0 8px 20px rgba(0, 0, 0, 0.12)" }}
         transition={{ duration: 250 }}
       >
         {/* Image */}

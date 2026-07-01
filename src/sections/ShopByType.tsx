@@ -51,8 +51,8 @@ export default function ShopByType() {
   const displayCats = categories.slice(0, 5);
 
   return (
-    <section className="py-20 px-6 border-b border-[rgba(0,0,0,0.1)]">
-      <div className="max-w-content mx-auto">
+    <section className="py-20 px-6 border-b-2 border-[rgba(0,0,0,0.1)]">
+      <div className="max-w-content mx-auto relative">
         <ScrollReveal>
           <SectionHeader
             label="[all assets]"

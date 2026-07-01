@@ -10,10 +10,10 @@ import { videos } from "@/data/videos";
 export default function AboutPage() {
   return (
     <div className="pt-14 bg-white min-h-screen">
-      <div className="max-w-content mx-auto border-x border-[rgba(0,0,0,0.08)] bg-white relative">
+      <div className="max-w-content mx-auto border-x-2 border-x-[rgba(0,0,0,0.1)] bg-white relative">
         
         {/* Section 1: Hero / Header */}
-        <section className="relative border-b border-[rgba(0,0,0,0.08)] py-20 px-6 text-center">
+        <section className="relative border-b-2 border-b-[rgba(0,0,0,0.1)] py-20 px-6 text-center">
           {/* Intersection Corner Dots */}
           <CornerDots className="-top-[9px] -left-[9px] z-10" />
           <CornerDots className="-top-[9px] -right-[9px] z-10" />
@@ -35,7 +35,7 @@ export default function AboutPage() {
         </section>
 
         {/* Section 2: The Why */}
-        <section className="relative border-b border-[rgba(0,0,0,0.08)] py-20 px-8">
+        <section className="relative border-b-2 border-b-[rgba(0,0,0,0.1)] py-20 px-8">
           {/* Intersection Corner Dots */}
           <CornerDots className="-top-[9px] -left-[9px] z-10" />
           <CornerDots className="-top-[9px] -right-[9px] z-10" />
@@ -76,11 +76,11 @@ export default function AboutPage() {
             </ScrollReveal>
 
             <ScrollReveal delay={0.1}>
-              <div className="relative p-1 border border-[rgba(0,0,0,0.08)] rounded-card bg-bg-secondary">
+              <div className="relative p-1 border-2 border-[rgba(0,0,0,0.1)] rounded-card bg-bg-secondary">
                 <img
                   src="/images/about-doron.png"
                   alt="Doron portrait next to Broadway poster"
-                  className="w-full aspect-[3/4] object-cover rounded-card border border-[rgba(0,0,0,0.08)] grayscale hover:grayscale-0 transition-all duration-300 shadow-card"
+                  className="w-full aspect-[3/4] object-cover rounded-card border-2 border-[rgba(0,0,0,0.1)] grayscale hover:grayscale-0 transition-all duration-300 shadow-card"
                 />
               </div>
             </ScrollReveal>

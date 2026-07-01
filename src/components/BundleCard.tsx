@@ -12,8 +12,8 @@ export default function BundleCard({ bundle }: BundleCardProps) {
   return (
     <Link href={`/bundles`}>
       <motion.div
-        className="group cursor-pointer h-full border border-[rgba(0,0,0,0.12)] rounded-card overflow-hidden bg-white hover:shadow-card-hover transition-shadow duration-300"
-        whileHover={{ y: -3 }}
+        className="group cursor-pointer h-full card-frame overflow-hidden accent-corner-tl accent-corner-tr accent-corner-bl accent-corner-br"
+        whileHover={{ y: -3, boxShadow: "0 8px 20px rgba(0, 0, 0, 0.12)" }}
         transition={{ duration: 0.25 }}
       >
         {/* Top colored tab */}
